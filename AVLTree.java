@@ -4,7 +4,7 @@ import java.util.Queue;
 public class AVLTree {
 	private AVLNode root;
 	
-	private static class AVLNode {
+	private class AVLNode {
 		AVLNode left;
 		AVLNode right;
 		Integer num;
@@ -27,7 +27,7 @@ public class AVLTree {
 			node = new AVLNode(num);
 		else if (num < node.num) {
 			node.left = insert(num, node.left);
-			if (height(node.left) - height(node.right) == 2) {
+			if (balanceFactor(node) == 2) {
 				if (num < node.left.num)
 					node = rightRotation(node);
 				else
@@ -36,7 +36,7 @@ public class AVLTree {
 		}
 		else if (num > node.num) {
 			node.right = insert(num, node.right);
-			if (height(node.right) - height(node.left) == 2) {
+			if (balanceFactor(node) == -2) {
 				if (num > node.right.num)
 					node = leftRotation(node);
 				else
@@ -48,8 +48,67 @@ public class AVLTree {
 		return node;
 	}
 	
+	public void remove(Integer num) {
+		root = remove(num, root);
+	}
+	
+	private AVLNode remove(Integer num, AVLNode node) {
+		if (num < node.num) {
+			node.left = remove(num, node.left);
+		}
+		else if (num > node.num) {
+			node.right = remove(num, node.right);
+		}
+		else if (num == node.num) {
+			if (node.right != null) {
+				AVLNode aux = node.right;
+				while (aux.left != null) {
+					aux = aux.left;
+				}
+				
+				node.num = aux.num;
+				node.right = remove(aux.num, node.right);
+			}
+			else if (node.left != null) {
+				AVLNode aux = node.left;
+				while (aux.right != null) {
+					aux = aux.right;
+				}
+				
+				node.num = aux.num;
+				node.left = remove(aux.num, node.left);
+			}
+			else
+				node = null;
+		}
+		
+		if (node == null)
+			return node;
+		
+		node.height = Math.max(height(node.left), height(node.right)) + 1;
+		
+		if (balanceFactor(node) > 1) {
+			if (balanceFactor(node.left) >= 0)
+				node = rightRotation(node);
+			else
+				node = leftRightRotation(node);
+		}
+		else if (balanceFactor(node) < -1) {
+			if (balanceFactor(node.right) <= 0)
+				node = leftRotation(node);
+			else
+				node = rightLeftRotation(node);
+		}
+
+		return node;
+	}
+	
 	private static int height(AVLNode node) {
 		  return node == null ? -1 : node.height;
+	}
+	
+	private static int balanceFactor(AVLNode node) {
+		return height(node.left) - height(node.right);
 	}
 
 	private static AVLNode rightRotation(AVLNode node) {
@@ -82,7 +141,7 @@ public class AVLTree {
 	
 	public void print() {
 		Queue<AVLNode> queue = new LinkedList<AVLNode>();
-		LinkedList<Integer> list = new LinkedList<Integer>();
+		LinkedList<AVLNode> list = new LinkedList<AVLNode>();
 		
 		queue.offer(root);
 		while(list.size() < 31) {
@@ -90,18 +149,18 @@ public class AVLTree {
 			if(aux != null) {
 				queue.offer(aux.left);
 				queue.offer(aux.right);
-				list.add(aux.num);
+				list.add(aux);
 			}
 			else {
 				queue.offer(null);
 				queue.offer(null);
-				list.add(-1);
+				list.add(null);
 			}
 		}
 		
 		int index = 0;
 		int power = 1;
-		for (Integer num : list) {
+		for (AVLNode node : list) {
 			if (index+1 == power) {
 				if (index != 0)
 					System.out.println("]");
@@ -115,12 +174,12 @@ public class AVLTree {
 					System.out.print(",");
 			}
 				
-			if (num != -1)
-				System.out.print(num);
+			if (node != null)
+				System.out.print(node.num + "(" + balanceFactor(node) + ")");
 			else
 				System.out.print("X");
 			index++;
 		}
-		System.out.println("]");
+		System.out.println("]\n");
 	}
 }
