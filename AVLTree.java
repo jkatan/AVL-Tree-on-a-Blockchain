@@ -53,6 +53,9 @@ public class AVLTree {
 	}
 	
 	private AVLNode remove(Integer num, AVLNode node) {
+		if (node == null)
+			return node;
+		
 		if (num < node.num) {
 			node.left = remove(num, node.left);
 		}
@@ -144,7 +147,7 @@ public class AVLTree {
 		LinkedList<AVLNode> list = new LinkedList<AVLNode>();
 		
 		queue.offer(root);
-		while(list.size() < 31) {
+		while(list.size() < (Math.pow(2, height(root)+1)-1)) {
 			AVLNode aux = queue.poll();
 			if(aux != null) {
 				queue.offer(aux.left);
@@ -180,6 +183,8 @@ public class AVLTree {
 				System.out.print("X");
 			index++;
 		}
-		System.out.println("]\n");
+		
+		if (root != null)
+			System.out.println("]\n");
 	}
 }
