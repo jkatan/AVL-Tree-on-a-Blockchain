@@ -1,4 +1,5 @@
 import java.util.Scanner;
+import java.io.*;
 
 public class AVLTreeInBlockChain {
 	public static void main(String[] args) {
@@ -48,7 +49,24 @@ public class AVLTreeInBlockChain {
 				
 			}
 			else if (cmd.startsWith("modify ")) {
-				
+
+				String fileName = cmd.substring(7);
+				try {
+					FileReader fileReader = new FileReader(fileName);
+					BufferedReader bufferedReader = new BufferedReader(fileReader);
+					parseFile(bufferedReader);
+
+				}
+				catch(InvalidFileFormatException e){
+					System.out.println("El formato del archivo no es compatible con el standard de input");
+				}
+				catch(FileNotFoundException e) {
+					System.out.println("Unable to open file '" + fileName + "'");
+				}
+				catch(IOException e) {
+					System.out.println("Error reading file '" + fileName + "'");
+				}
+
 			}
 			else
 				System.out.println("Invalid Command");
@@ -82,5 +100,11 @@ public class AVLTreeInBlockChain {
 			throw new IllegalArgumentException();
 		else
 			return number;
+	}
+
+	/**Parsea el archivo y agrega a la blockchain el bloque descripto en el archivo.
+	 * */
+	private static void parseFile(BufferedReader buff)throws InvalidFileFormatException{
+
 	}
 }
