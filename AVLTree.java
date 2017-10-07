@@ -187,4 +187,26 @@ public class AVLTree {
 		if (root != null)
 			System.out.println("]\n");
 	}
+	
+	//El String que devuelve es un recorrido BFS del arbol.
+	public String toString() {
+		
+		StringBuilder tree = new StringBuilder();
+		
+		Queue<AVLNode> queue = new LinkedList<>();
+		queue.add(root);
+		
+		while(!queue.isEmpty()) {
+			AVLNode node = queue.poll();
+			tree.append(node.num);
+
+			if(node.left!=null)
+				queue.add(node.left);
+			
+			if(node.right!=null)
+				queue.add(node.right);
+		}
+		
+		return tree.toString();
+	}
 }
