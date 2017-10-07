@@ -27,7 +27,8 @@ public class Blockchain {
 			this.index = index;
 			this.previousBlock = previousBlock;
 			this.data = new BlockData(operation, currentState);		
-			
+			if(previousBlock!=null)
+				previousHash = previousBlock.hash;
 		}
 		
 		//Representacion en String del bloque para ser hasheado por SHA256
@@ -36,10 +37,8 @@ public class Blockchain {
 			block.append(index);
 			block.append(data.operation);
 			block.append(data.currentState.toString());
-			if(previousBlock!=null) {
-				previousHash = previousBlock.hash;
+			if(previousBlock!=null)
 				block.append(SHA256.bytesToHex(previousHash));	
-			}
 			
 			return block.toString();
 		}
