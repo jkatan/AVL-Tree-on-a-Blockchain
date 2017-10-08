@@ -122,4 +122,24 @@ public class Blockchain {
 			current = current.previousBlock;
 		}
 	}
+	
+	//Devuelve falso si no existe el bloque con el indice indicado, verdadero en caso contrario
+	public boolean modify(int index, int nonce, String operation, AVLTree tree, String prevHash) {
+		
+		Block current = last;
+		while(current!=null) {
+			if(current.index==index) {
+				current.nonce = nonce;
+				current.data.operation = operation;
+				current.data.currentState = tree;
+				current.previousHash = SHA256.hexToByte(prevHash);
+				current.hash = SHA256.hash(current.blockToHash());	//Actualizo el hash del bloque luego de modificarlo
+				return true;
+			}
+			
+			current = current.previousBlock;
+		}
+		
+		return false;
+	}
 }

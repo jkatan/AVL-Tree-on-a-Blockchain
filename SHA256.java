@@ -2,6 +2,8 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import javax.xml.bind.DatatypeConverter;
+
 public abstract class SHA256 {
 
 	public static byte[] hash(String str) {
@@ -40,5 +42,9 @@ public abstract class SHA256 {
 				return false;
 		
 		return true;
+	}
+	
+	public static byte[] hexToByte(String s) {
+	    return DatatypeConverter.parseHexBinary(s);
 	}
 }

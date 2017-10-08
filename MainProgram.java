@@ -1,3 +1,4 @@
+import java.util.InputMismatchException;
 import java.util.Scanner;
 import java.io.*;
 
@@ -19,6 +20,7 @@ public class MainProgram {
 		Blockchain blockchain = new Blockchain(zeros);
 		Integer numToRead = null;
 		Scanner cmdReader = new Scanner(System.in);
+		
 		while (!exit) {
 			System.out.print("> ");
 			String cmd = cmdReader.nextLine();
@@ -65,24 +67,40 @@ public class MainProgram {
 					System.out.println("Invalid blockchain");
 			}
 			else if (cmd.startsWith("modify ")) {
+				if(cmd.length()>=10) {
+					boolean check = true;
+					Scanner in = new Scanner(cmd.substring(7));
+					try {
+						numToRead = Integer.parseInt(in.next());
+					} catch (NumberFormatException e) {
+						numToRead = null;
+						System.out.println("Invalid command");
+						check = false;
+					}
+					if(check) {
+						String fileName = in.next();
+						System.out.println("Nombre de archivo: " + fileName + " numero: " + numToRead);
+						try {
+							FileReader fileReader = new FileReader(fileName);
+							BufferedReader bufferedReader = new BufferedReader(fileReader);
+							parseFile(bufferedReader, blockchain);
 
-				String fileName = cmd.substring(7);
-				try {
-					FileReader fileReader = new FileReader(fileName);
-					BufferedReader bufferedReader = new BufferedReader(fileReader);
-					parseFile(bufferedReader);
-
+						}
+						catch(InvalidFileFormatException e){
+							System.out.println("El formato del archivo no es compatible con el standard de input");
+						}
+						catch(FileNotFoundException e) {
+							System.out.println("Unable to open file '" + fileName + "'");
+						}
+						catch(IOException e) {
+							System.out.println("Error reading file '" + fileName + "'");
+						}
+					}
+					
+					in.close();
 				}
-				catch(InvalidFileFormatException e){
-					System.out.println("El formato del archivo no es compatible con el standard de input");
-				}
-				catch(FileNotFoundException e) {
-					System.out.println("Unable to open file '" + fileName + "'");
-				}
-				catch(IOException e) {
-					System.out.println("Error reading file '" + fileName + "'");
-				}
-
+				else
+					System.out.println("Invalid Command");
 			}
 			else
 				System.out.println("Invalid Command");
@@ -121,40 +139,40 @@ public class MainProgram {
 			return number;
 	}
 
-	/**Parsea el archivo y agrega a la blockchain el bloque descripto en el archivo.
+	/**Parsea el archivo y modifica el bloque indicado
 	 * */
-	private static void parseFile(BufferedReader buff) throws InvalidFileFormatException, IOException {
+	private static void parseFile(BufferedReader buff, Blockchain blockchain) throws InvalidFileFormatException, IOException {
 
-		String blockIDStr = buff.readLine();
+		String blockIndexStr = buff.readLine();
 		String nonceStr = buff.readLine();
 		String dataStr = buff.readLine();
 		String prevHashStr = buff.readLine();
 
-		String [] IDarr = blockIDStr.split(": ");
-		if(IDarr.length > 2)
-			throw new InvalidFileFormatException("formato del BlockID no compatible");
-		int blockID = Integer.parseInt(IDarr[1]);
+		String [] indexArr = blockIndexStr.split(": ");
+		if(indexArr.length > 2)
+			throw new InvalidFileFormatException("formato del index no compatible");
+		int index = Integer.parseInt(indexArr[1]);
 
 		String [] nonceArr =  nonceStr.split(": ");
-		if(IDarr.length > 2)
+		if(nonceArr.length > 2)
 			throw new InvalidFileFormatException("formato del nonce no compatible");
 		int nonce = Integer.parseInt(nonceArr[1]);
 
 		// hay que estandarizar los nombres de las operaciones para el archivo
-		String [] DataArr =  dataStr.split(": ");
-		if(IDarr.length > 4)
+		String [] dataArr =  dataStr.split(": ");
+		if(dataArr.length > 4)
 			throw new InvalidFileFormatException("formato de los datos no compatible");
-		String operation = DataArr[1];
+		String operation = dataArr[1];
 
 		//el arbol debe estar como una list en formato BFS en el archivo
 		//me parece que BFS es la mejor manera asi no hace rotaciones cuando se crea el nuevo arbol
-		String[] nodes = DataArr[2].split(",");
+		String[] nodes = dataArr[2].split(",");
 		AVLTree tree = new AVLTree();
 		for(int i = 0; i< nodes.length; i++){
 			tree.insert(Integer.parseInt(nodes[i]));
 		}
 
-		String[] modifiedArr = DataArr[3].split(",");
+		String[] modifiedArr = dataArr[3].split(",");
 		if(modifiedArr.length == 0)
 			throw  new InvalidFileFormatException("no hay nodos modificados en el array de nodos modificados");
 		int[] modified = new int[modifiedArr.length];
@@ -163,12 +181,10 @@ public class MainProgram {
 		}
 
 		String [] prevHashArr =  prevHashStr.split(": ");
-		if(IDarr.length > 2)
+		if(indexArr.length > 2)
 			throw new InvalidFileFormatException("formato del prevHash no compatible");
-		int prevHash = Integer.parseInt(prevHashArr[1]);
+		String prevHash = prevHashArr[1];
 
-		//hay que crear un bloque con blockID, nonce, operacion, tree, modificados , prevhash y despues
-		//agregarlo a la blockchain
-
+		blockchain.modify(index, nonce, operation, tree, prevHash);
 	}
 }
