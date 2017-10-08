@@ -18,6 +18,36 @@ public class AVLTree {
 		}
 	}
 	
+	public AVLTree() {};
+	
+	public AVLTree(AVLTree tree) {
+		root = new AVLNode(tree.root.num);
+		buildFromTree(tree.root);
+	}
+	
+	private void buildFromTree(AVLNode original) {
+		
+		if(original.left==null && original.right==null)
+			return;
+		
+		if(original.right!=null && original.left==null) {
+			this.insert(original.right.num);
+			buildFromTree(original.right);
+			return;
+		}
+		
+		if(original.left!=null && original.right==null) {
+			this.insert(original.left.num);
+			buildFromTree(original.left);
+			return;
+		}
+		
+		this.insert(original.left.num);
+		this.insert(original.right.num);
+		buildFromTree(original.left);
+		buildFromTree(original.right);
+	}
+	
 	public void insert(Integer num) {
 		root = insert(num, root);
 	}

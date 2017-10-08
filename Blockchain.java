@@ -21,6 +21,12 @@ public class Blockchain {
 				this.operation = operation;
 				this.currentState = currentState;
 			}
+			
+			private void print() {
+				System.out.println("Operation: " + operation);
+				System.out.println("Tree: ");
+				currentState.print();
+			}
 		}
 		
 		Block(Integer index, String operation, AVLTree currentState, Block previousBlock) {
@@ -41,6 +47,15 @@ public class Blockchain {
 				block.append(SHA256.bytesToHex(previousHash));	
 			
 			return block.toString();
+		}
+		
+		private void print() {
+			System.out.println("Index: " + index);
+			System.out.println("Nonce: " + nonce);
+			System.out.println("Hash: " + SHA256.bytesToHex(hash));
+			if(previousHash!=null)
+				System.out.println("Previous hash: " + SHA256.bytesToHex(previousHash));
+			data.print();
 		}
 	}
 		
@@ -83,5 +98,28 @@ public class Blockchain {
 		
 		int shifted = hash[i] >> 4; //Tomo los 4 bits mas significativos
 		return shifted==0?true:false;
+	}
+	
+	public boolean validate() {
+		
+		Block current = last;
+		while(current!=null) {
+			if(current.previousBlock!=null)
+				if(!SHA256.compareHashes(current.previousHash, current.previousBlock.hash))
+					return false;
+			
+			current = current.previousBlock;
+		}
+		
+		return true;
+	}
+	
+	public void print() {
+		
+		Block current = last;
+		while(current!=null) {
+			current.print();
+			current = current.previousBlock;
+		}
 	}
 }

@@ -1,23 +1,24 @@
 import java.util.Scanner;
 import java.io.*;
 
-public class AVLTreeInBlockChain {
+public class MainProgram {
 	public static void main(String[] args) {
-		
-		AVLTree tree = new AVLTree();
+		String[] a = {"zeros", "3"};
 		boolean exit = false;
-		int zeros;
+		int zeros = 0;
 
 		try {
-			zeros = readArgs(args);
+			zeros = readArgs(a);
 		}
 		catch (IllegalArgumentException e) {
 			System.out.println("Invalid Argument");
 			exit = true;
 		}
 		
+		AVLTree tree = new AVLTree();
+		Blockchain blockchain = new Blockchain(zeros);
+		Integer numToRead = null;
 		Scanner cmdReader = new Scanner(System.in);
-		
 		while (!exit) {
 			System.out.print("> ");
 			String cmd = cmdReader.nextLine();
@@ -26,28 +27,42 @@ public class AVLTreeInBlockChain {
 			else if (cmd.startsWith("add ")) {
 				String num = cmd.substring(4);
 				try {
-					tree.insert(Integer.parseInt(num));
+					numToRead = Integer.parseInt(num);
 				}
 				catch (NumberFormatException e) {
 					System.out.println("Invalid Command");
+					numToRead = null;
 				}
-				tree.print();
+				
+				if(numToRead!=null) {
+					tree.insert(numToRead);
+					blockchain.addBlock(numToRead + " added", new AVLTree(tree));
+					blockchain.print();
+				}
 			}
 			else if (cmd.startsWith("remove ")) {
 				String num = cmd.substring(7);
 				try {
-					tree.remove(Integer.parseInt(num));
+					numToRead = Integer.parseInt(num);
 				}
 				catch (NumberFormatException e) {
 					System.out.println("Invalid Command");
+					numToRead = null;
 				}
-				tree.print();
+				if(numToRead!=null) {
+					tree.remove(numToRead);
+					blockchain.addBlock(numToRead + " removed", new AVLTree(tree));
+					blockchain.print();
+				}
 			}
 			else if (cmd.startsWith("lookup ")) {
 				
 			}
 			else if (cmd.equals("validate")) {
-				
+				if(blockchain.validate())
+					System.out.println("Valid blockchain");
+				else
+					System.out.println("Invalid blockchain");
 			}
 			else if (cmd.startsWith("modify ")) {
 
@@ -77,11 +92,14 @@ public class AVLTreeInBlockChain {
 	}
 	
 	private static int readArgs(String[] args) throws IllegalArgumentException {
-		String stringArgs = "";
-		for (String arg : args)
-			stringArgs += arg + " ";
+		StringBuilder stringArgs = new StringBuilder();
+		String space = " ";
+		for (String arg : args) {
+			stringArgs.append(arg);
+			stringArgs.append(space);
+		}
 		
-		Scanner argReader = new Scanner(stringArgs);
+		Scanner argReader = new Scanner(stringArgs.toString());
 		String arg;
 		int number;
 		boolean extraArgs;
@@ -122,7 +140,7 @@ public class AVLTreeInBlockChain {
 			throw new InvalidFileFormatException("formato del nonce no compatible");
 		int nonce = Integer.parseInt(nonceArr[1]);
 
-		// hay que estandarisar los nombres de las operaciones para el archivo
+		// hay que estandarizar los nombres de las operaciones para el archivo
 		String [] DataArr =  dataStr.split(": ");
 		if(IDarr.length > 4)
 			throw new InvalidFileFormatException("formato de los datos no compatible");
@@ -151,7 +169,6 @@ public class AVLTreeInBlockChain {
 
 		//hay que crear un bloque con blockID, nonce, operacion, tree, modificados , prevhash y despues
 		//agregarlo a la blockchain
-
 
 	}
 }
