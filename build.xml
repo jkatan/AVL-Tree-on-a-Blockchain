@@ -23,7 +23,7 @@
     </jar>
   </target>
 
-  <target name="clean" description="clean build directory">
+  <target name="clean" description="clean build and dist directory">
     <delete dir="${build}"/>
     <delete dir="${dist}"/>
   </target>
