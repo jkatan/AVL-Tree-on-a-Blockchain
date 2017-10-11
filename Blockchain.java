@@ -1,4 +1,3 @@
-import sun.security.provider.SHA;
 
 public class Blockchain {
 	private Block last;			//Ultimo bloque en la blockchain
