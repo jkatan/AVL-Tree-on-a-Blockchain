@@ -4,6 +4,7 @@ import java.io.*;
 
 public class MainProgram {
 	public static void main(String[] args) {
+		
 		boolean exit = false;
 		int zeros = 0;
 
@@ -37,8 +38,8 @@ public class MainProgram {
 				
 				if(numToRead!=null) {
 					tree.insert(numToRead);
-					blockchain.addBlock(numToRead + " added", new AVLTree(tree));
-					blockchain.print();
+					blockchain.addBlock("add " + numToRead, new AVLTree(tree));
+					blockchain.printCurrentBlock();
 				}
 			}
 			else if (cmd.startsWith("remove ")) {
@@ -52,7 +53,7 @@ public class MainProgram {
 				}
 				if(numToRead!=null) {
 					tree.remove(numToRead);
-					blockchain.addBlock(numToRead + " removed", new AVLTree(tree));
+					blockchain.addBlock("remove " + numToRead, new AVLTree(tree));
 					blockchain.print();
 				}
 			}
@@ -78,11 +79,11 @@ public class MainProgram {
 					}
 					if(check) {
 						String fileName = in.next();
-						System.out.println("Nombre de archivo: " + fileName + " numero: " + numToRead);
+						System.out.println("Nombre de archivo: " + fileName + ", Indice: " + numToRead);
 						try {
 							FileReader fileReader = new FileReader(fileName);
 							BufferedReader bufferedReader = new BufferedReader(fileReader);
-							parseFile(bufferedReader, blockchain);
+							parseFile(numToRead, bufferedReader, blockchain);
 
 						}
 						catch(InvalidFileFormatException e){
@@ -109,6 +110,11 @@ public class MainProgram {
 	}
 	
 	private static int readArgs(String[] args) throws IllegalArgumentException {
+		if(args==null) {
+			System.out.println("Invalid command");
+			return -1;
+		}
+		
 		StringBuilder stringArgs = new StringBuilder();
 		String space = " ";
 		for (String arg : args) {
@@ -140,49 +146,93 @@ public class MainProgram {
 
 	/**Parsea el archivo y modifica el bloque indicado
 	 * */
-	private static void parseFile(BufferedReader buff, Blockchain blockchain) throws InvalidFileFormatException, IOException {
+	private static void parseFile(int index, BufferedReader buff, Blockchain blockchain) throws InvalidFileFormatException, IOException {
 
-		String blockIndexStr = buff.readLine();
+		//String blockIndexStr = buff.readLine();
 		String nonceStr = buff.readLine();
-		String dataStr = buff.readLine();
+		String operationStr = buff.readLine();
+		String treeBFS = buff.readLine();
+		String modifiedNodesStr = buff.readLine();
 		String prevHashStr = buff.readLine();
+		
+		int nonce = 0;
+		String operation = null;
 
-		String [] indexArr = blockIndexStr.split(": ");
-		if(indexArr.length > 2)
+		/*String [] indexArr = blockIndexStr.split(": ");
+		if(indexArr.length != 2 || !indexArr[0].equals("index"))
 			throw new InvalidFileFormatException("formato del index no compatible");
-		int index = Integer.parseInt(indexArr[1]);
+		try {
+			index = Integer.parseInt(indexArr[1]);
+		} catch (NumberFormatException e) {
+			index = -1;
+			System.out.println("formato del index no compatible");
+			return;
+		}*/
 
 		String [] nonceArr =  nonceStr.split(": ");
-		if(nonceArr.length > 2)
+		if(nonceArr.length != 2 || !nonceArr[0].equals("nonce"))
 			throw new InvalidFileFormatException("formato del nonce no compatible");
-		int nonce = Integer.parseInt(nonceArr[1]);
-
+		try {
+			nonce = Integer.parseInt(nonceArr[1]);
+		} catch (NumberFormatException e) {
+			nonce = -1;
+			System.out.println("formato del nonce no compatible");
+			return;
+		}
+		
 		// hay que estandarizar los nombres de las operaciones para el archivo
-		String [] dataArr =  dataStr.split(": ");
-		if(dataArr.length > 4)
+		String [] operationArr =  operationStr.split(": ");
+		if(operationArr.length != 2 || !operationArr[0].equals("operation") || (!operationArr[1].startsWith("add") 
+				&& !operationArr[1].startsWith("remove")))
 			throw new InvalidFileFormatException("formato de los datos no compatible");
-		String operation = dataArr[1];
+		operation = operationArr[1];
 
 		//el arbol debe estar como una list en formato BFS en el archivo
-		//me parece que BFS es la mejor manera asi no hace rotaciones cuando se crea el nuevo arbol
-		String[] nodes = dataArr[2].split(",");
+		String[] treeData = treeBFS.split(": ");
+		if(treeData.length != 2 || !treeData[0].equals("tree"))
+			throw new InvalidFileFormatException("formato del arbol no compatible");
+		String[] nodes = treeData[1].split(", ");
 		AVLTree tree = new AVLTree();
 		for(int i = 0; i< nodes.length; i++){
-			tree.insert(Integer.parseInt(nodes[i]));
+			
+			try {
+				tree.insert(Integer.parseInt(nodes[i]));
+			} catch (NumberFormatException e) {
+				System.out.println("formato de nodo invalido");
+				return;
+			}
 		}
 
-		String[] modifiedArr = dataArr[3].split(",");
-		if(modifiedArr.length == 0)
-			throw  new InvalidFileFormatException("no hay nodos modificados en el array de nodos modificados");
-		int[] modified = new int[modifiedArr.length];
-		for(int i = 0;i<modifiedArr.length; i++){
-			modified[i] = Integer.parseInt(modifiedArr[i]);
+		String[] modifiedNodesArr = modifiedNodesStr.split(": ");
+		if(modifiedNodesArr.length != 2 || !modifiedNodesArr[0].equals("modified"))
+			throw  new InvalidFileFormatException("formato de nodos modificados invalido");
+		String[] modifiedNodes = modifiedNodesArr[1].split(", ");
+		int[] modified = new int[modifiedNodes.length];
+		for(int i = 0;i<modifiedNodes.length; i++){
+			
+			try {
+				modified[i] = Integer.parseInt(modifiedNodes[i]);
+			} catch (NumberFormatException e) {
+				System.out.println("formato de nodos modificados invalido");
+				return;
+			}
 		}
 
 		String [] prevHashArr =  prevHashStr.split(": ");
-		if(indexArr.length > 2)
+		if(prevHashArr.length != 2 || !prevHashArr[0].equals("prevHash"))
 			throw new InvalidFileFormatException("formato del prevHash no compatible");
+		
+		if(!SHA256.isHex(prevHashArr[1]))
+			throw new InvalidFileFormatException("prevHash escrito no es hexadecimal");
+		
 		String prevHash = prevHashArr[1];
+		
+		System.out.println("index: " + index);
+		System.out.println("nonce " + nonce);
+		System.out.println("operation " + operation);
+		System.out.println("tree ");
+		tree.print();		
+		System.out.println("prevHash " + prevHash);
 
 		blockchain.modify(index, nonce, operation, tree, prevHash);
 	}

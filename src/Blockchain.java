@@ -122,6 +122,10 @@ public class Blockchain {
 		}
 	}
 	
+	public void printCurrentBlock() {
+		last.print();
+	}
+	
 	//Devuelve falso si no existe el bloque con el indice indicado, verdadero en caso contrario
 	public boolean modify(int index, int nonce, String operation, AVLTree tree, String prevHash) {
 		

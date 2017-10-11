@@ -47,4 +47,14 @@ public abstract class SHA256 {
 	public static byte[] hexToByte(String s) {
 	    return DatatypeConverter.parseHexBinary(s);
 	}
+	
+	public static boolean isHex(String str) {
+		
+		int strLength = str.length();
+		for(int i=0; i<strLength; i++)
+			if(Character.digit(str.charAt(i), 16)==-1)
+				return false;
+		
+		return true;
+	}
 }
