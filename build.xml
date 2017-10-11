@@ -1,0 +1,30 @@
+<project name="AVLBlockchain_build" default="create_jar" basedir=".">
+  <description>
+    Build file for AVLBlockchain project
+  </description>
+  <property name="src" location="src"/>
+  <property name="build" location="build"/>
+  <property name="dist" location="dist"/>
+
+  <target name="init">
+    <mkdir dir="${build}"/>
+  </target>
+
+  <target name="compile" depends="init" description="compile the source">
+    <javac srcdir="${src}" destdir="${build}" includeAntRuntime="false"/>
+  </target>
+
+  <target name="create_jar" depends="compile" description="generate jar file">
+    <mkdir dir="${dist}"/>
+    <jar jarfile="${dist}/tpe.jar" basedir="${build}">
+      <manifest>
+        <attribute name="Main-Class" value="MainProgram "/>
+      </manifest>
+    </jar>
+  </target>
+
+  <target name="clean" description="clean build directory">
+    <delete dir="${build}"/>
+    <delete dir="${dist}"/>
+  </target>
+</project>
