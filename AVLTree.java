@@ -1,5 +1,7 @@
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.Set;
 
 public class AVLTree {
 	private AVLNode root;
@@ -48,29 +50,33 @@ public class AVLTree {
 		buildFromTree(original.right);
 	}
 	
-	public void insert(Integer num) {
-		root = insert(num, root);
+	public Set<Integer> insert(Integer num) {
+		Set<Integer> setModifiedNodes = new HashSet<>();
+		root = insert(num, root, setModifiedNodes);
+		return setModifiedNodes;
 	}
 	
-	private AVLNode insert(Integer num, AVLNode node) {
-		if (node == null)
+	private AVLNode insert(Integer num, AVLNode node, Set<Integer> set) {
+		if (node == null) {
 			node = new AVLNode(num);
+			set.add(node.num);
+		}
 		else if (num < node.num) {
-			node.left = insert(num, node.left);
+			node.left = insert(num, node.left, set);
 			if (balanceFactor(node) == 2) {
 				if (num < node.left.num)
-					node = rightRotation(node);
+					node = rightRotation(node, set);
 				else
-					node = leftRightRotation(node);
+					node = leftRightRotation(node, set);
 			}
 		}
 		else if (num > node.num) {
-			node.right = insert(num, node.right);
+			node.right = insert(num, node.right, set);
 			if (balanceFactor(node) == -2) {
 				if (num > node.right.num)
-					node = leftRotation(node);
+					node = leftRotation(node, set);
 				else
-					node = rightLeftRotation(node);
+					node = rightLeftRotation(node, set);
 			}
 		}
 		
@@ -78,19 +84,21 @@ public class AVLTree {
 		return node;
 	}
 	
-	public void remove(Integer num) {
-		root = remove(num, root);
+	public Set<Integer> remove(Integer num) {
+		Set<Integer> setModifiedNodes = new HashSet<>();
+		root = remove(num, root, setModifiedNodes);
+		return setModifiedNodes;
 	}
 	
-	private AVLNode remove(Integer num, AVLNode node) {
+	private AVLNode remove(Integer num, AVLNode node, Set<Integer> set) {
 		if (node == null)
 			return node;
 		
 		if (num < node.num) {
-			node.left = remove(num, node.left);
+			node.left = remove(num, node.left, set);
 		}
 		else if (num > node.num) {
-			node.right = remove(num, node.right);
+			node.right = remove(num, node.right, set);
 		}
 		else if (num == node.num) {
 			if (node.right != null) {
@@ -100,7 +108,7 @@ public class AVLTree {
 				}
 				
 				node.num = aux.num;
-				node.right = remove(aux.num, node.right);
+				node.right = remove(aux.num, node.right, set);
 			}
 			else if (node.left != null) {
 				AVLNode aux = node.left;
@@ -109,10 +117,12 @@ public class AVLTree {
 				}
 				
 				node.num = aux.num;
-				node.left = remove(aux.num, node.left);
+				node.left = remove(aux.num, node.left, set);
 			}
-			else
+			else {
+				set.add(node.num);
 				node = null;
+			}
 		}
 		
 		if (node == null)
@@ -122,15 +132,15 @@ public class AVLTree {
 		
 		if (balanceFactor(node) > 1) {
 			if (balanceFactor(node.left) >= 0)
-				node = rightRotation(node);
+				node = rightRotation(node, set);
 			else
-				node = leftRightRotation(node);
+				node = leftRightRotation(node, set);
 		}
 		else if (balanceFactor(node) < -1) {
 			if (balanceFactor(node.right) <= 0)
-				node = leftRotation(node);
+				node = leftRotation(node, set);
 			else
-				node = rightLeftRotation(node);
+				node = rightLeftRotation(node, set);
 		}
 
 		return node;
@@ -144,32 +154,40 @@ public class AVLTree {
 		return height(node.left) - height(node.right);
 	}
 
-	private static AVLNode rightRotation(AVLNode node) {
+	private static AVLNode rightRotation(AVLNode node, Set<Integer> set) {
 		AVLNode aux = node.left;
         node.left = aux.right;
         aux.right = node;
+        set.add(aux.num);
+        set.add(node.num);
+        if (node.left != null)
+        	set.add(node.left.num);
         node.height = Math.max(height(node.left), height(node.right)) + 1;
         aux.height = Math.max(height(aux.left), node.height) + 1;
         return aux;
 	}
 	
-	private static AVLNode leftRotation(AVLNode node) {
+	private static AVLNode leftRotation(AVLNode node, Set<Integer> set) {
 		AVLNode aux = node.right;
         node.right = aux.left;
         aux.left = node;
+        set.add(aux.num);
+        set.add(node.num);
+        if (node.right != null)
+        	set.add(node.right.num);
         node.height = Math.max(height(node.left), height(node.right)) + 1;
         aux.height = Math.max(height(aux.right), node.height) + 1;
         return aux;
 	}
 	
-	private static AVLNode leftRightRotation(AVLNode node) {
-		node.left = leftRotation(node.left);
-        return rightRotation(node);
+	private static AVLNode leftRightRotation(AVLNode node, Set<Integer> set) {
+		node.left = leftRotation(node.left, set);
+        return rightRotation(node, set);
 	}
 	
-	private static AVLNode rightLeftRotation(AVLNode node) {
-		node.right = rightRotation(node.right);
-        return leftRotation(node);
+	private static AVLNode rightLeftRotation(AVLNode node, Set<Integer> set) {
+		node.right = rightRotation(node.right, set);
+        return leftRotation(node, set);
 	}
 	
 	public void print() {
