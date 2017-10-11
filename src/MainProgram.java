@@ -26,6 +26,8 @@ public class MainProgram {
 			String cmd = cmdReader.nextLine();
 			if (cmd.equals("exit"))
 				exit = true;
+			else if(cmd.equals("print"))
+				blockchain.print();
 			else if (cmd.startsWith("add ")) {
 				String num = cmd.substring(4);
 				try {
@@ -148,7 +150,6 @@ public class MainProgram {
 	 * */
 	private static void parseFile(int index, BufferedReader buff, Blockchain blockchain) throws InvalidFileFormatException, IOException {
 
-		//String blockIndexStr = buff.readLine();
 		String nonceStr = buff.readLine();
 		String operationStr = buff.readLine();
 		String treeBFS = buff.readLine();
@@ -157,17 +158,7 @@ public class MainProgram {
 		
 		int nonce = 0;
 		String operation = null;
-
-		/*String [] indexArr = blockIndexStr.split(": ");
-		if(indexArr.length != 2 || !indexArr[0].equals("index"))
-			throw new InvalidFileFormatException("formato del index no compatible");
-		try {
-			index = Integer.parseInt(indexArr[1]);
-		} catch (NumberFormatException e) {
-			index = -1;
-			System.out.println("formato del index no compatible");
-			return;
-		}*/
+		int[] modified = null;
 
 		String [] nonceArr =  nonceStr.split(": ");
 		if(nonceArr.length != 2 || !nonceArr[0].equals("nonce"))
@@ -204,17 +195,20 @@ public class MainProgram {
 		}
 
 		String[] modifiedNodesArr = modifiedNodesStr.split(": ");
-		if(modifiedNodesArr.length != 2 || !modifiedNodesArr[0].equals("modified"))
+		if(modifiedNodesArr.length == 0 || modifiedNodesArr.length > 2 || !modifiedNodesArr[0].equals("modified"))
 			throw  new InvalidFileFormatException("formato de nodos modificados invalido");
-		String[] modifiedNodes = modifiedNodesArr[1].split(", ");
-		int[] modified = new int[modifiedNodes.length];
-		for(int i = 0;i<modifiedNodes.length; i++){
-			
-			try {
-				modified[i] = Integer.parseInt(modifiedNodes[i]);
-			} catch (NumberFormatException e) {
-				System.out.println("formato de nodos modificados invalido");
-				return;
+		
+		if(modifiedNodesArr.length==2) {
+			String[] modifiedNodes = modifiedNodesArr[1].split(", ");
+			modified = new int[modifiedNodes.length];
+			for(int i = 0;i<modifiedNodes.length; i++){
+				
+				try {
+					modified[i] = Integer.parseInt(modifiedNodes[i]);
+				} catch (NumberFormatException e) {
+					System.out.println("formato de nodos modificados invalido");
+					return;
+				}
 			}
 		}
 
@@ -224,15 +218,7 @@ public class MainProgram {
 		
 		if(!SHA256.isHex(prevHashArr[1]))
 			throw new InvalidFileFormatException("prevHash escrito no es hexadecimal");
-		
 		String prevHash = prevHashArr[1];
-		
-		System.out.println("index: " + index);
-		System.out.println("nonce " + nonce);
-		System.out.println("operation " + operation);
-		System.out.println("tree ");
-		tree.print();		
-		System.out.println("prevHash " + prevHash);
 
 		blockchain.modify(index, nonce, operation, tree, prevHash);
 	}
