@@ -3,7 +3,9 @@ public class Blockchain {
 	private Block last;			//Ultimo bloque en la blockchain
 	private int currentIndex;	//Indice del ultimo bloque agregado en la blockchain
 	private int initialCeros;	//Cantidad de ceros iniciales para validar el hash
-	
+	//Comentario extra: si no pidiera retornar nodos modificados, la blockchain podria hacerse mucho mas segura armando
+	//el arbol unicamente cuando se lo pide, es decir guardando instrucciones (partes) del mismo en cada bloque.
+
 	private static class Block {
 		Integer index;
 		Integer nonce;
@@ -15,10 +17,12 @@ public class Blockchain {
 		private static class BlockData {
 			String operation;		//Operacion realizada sobre el arbol AVL.
 			AVLTree currentState;	//El arbol AVL al momento de haber realizado la operacion.
+			ArrayList<Integer> modifiedValues; //Los bloques que fueron modificados en la ultima operacion.
 			
-			BlockData(String operation, AVLTree currentState) {
+			BlockData(String operation, AVLTree currentState, ArrayList<Integer> modValues) {
 				this.operation = operation;
 				this.currentState = currentState;
+				this.modifiedBlocks = modBlocks;
 			}
 			
 			private void print() {
@@ -28,22 +32,22 @@ public class Blockchain {
 			}
 		}
 		
-		Block(Integer index, String operation, AVLTree currentState, Block previousBlock) {
+		Block(Integer index, String operation, AVLTree currentState, ArrayList<Integer> modValues, Block previousBlock) {
 			this.index = index;
 			this.previousBlock = previousBlock;
-			this.data = new BlockData(operation, currentState);		
+			this.data = new BlockData(operation, currentState, modValues);
 			if(previousBlock!=null)
 				previousHash = previousBlock.hash;
 		}
 		
-		//Representacion en String del bloque para ser hasheado por SHA256
+		//Representacion en String del bloque para ser hasheado por HashUtilities
 		public String blockToHash() {
 			StringBuilder block = new StringBuilder();
 			block.append(index);
 			block.append(data.operation);
 			block.append(data.currentState.toString());
 			if(previousBlock!=null)
-				block.append(SHA256.bytesToHex(previousHash));	
+				block.append(HashUtilities.bytesToHex(previousHash));	
 			
 			return block.toString();
 		}
@@ -51,9 +55,9 @@ public class Blockchain {
 		private void print() {
 			System.out.println("Index: " + index);
 			System.out.println("Nonce: " + nonce);
-			System.out.println("Hash: " + SHA256.bytesToHex(hash));
+			System.out.println("Hash: " + HashUtilities.bytesToHex(hash));
 			if(previousHash!=null)
-				System.out.println("Previous hash: " + SHA256.bytesToHex(previousHash));
+				System.out.println("Previous hash: " + HashUtilities.bytesToHex(previousHash));
 			data.print();
 		}
 	}
@@ -64,23 +68,46 @@ public class Blockchain {
 		this.initialCeros = initialCeros;
 	}
 	
-	public void addBlock(String operation, AVLTree currentTree) {
+	public boolean addBlock(String operation, AVLTree currentTree, ArrayList<Integer> modValues) {
 		 
-		currentIndex++;
-		Block block = new Block(currentIndex, operation, currentTree, last);
-		mine(block);
-		last = block;
+		if(validate()) {
+			currentIndex++;
+			Block block = new Block(currentIndex, operation, currentTree, modValues, last);
+			mine(block);
+			last = block;
+			return true;
+		}
+		
+		return false;
+	}
+
+	public ArrayList<Integer> lookup(Integer num){
+		ArrayList<Integer> blockIndexes = new ArrayList<Integer>();
+		lookupRec(blockindexes, this.last, num);
+		if(blockIndexes.isEmpty())
+			return null;
+		return blockIndexes;
+	}
+
+	private void lookupRec(ArrayList<Integer> indexRet, Block current, Integer num) {
+		if(current.data.modifiedValues.contains(num)){
+			indexRet.insert(num);
+		}else if (current.previousBlock == null) {
+			return;
+		}else {
+			lookupRec(indexRet, current.previousBlock, num);
+		}
 	}
 	
 	private void mine(Block block) {
 		block.nonce = 1;
 		String toHash = block.blockToHash() + block.nonce.toString();
-		block.hash = SHA256.hash(toHash);
+		block.hash = HashUtilities.hash(toHash);
 		
 		while(!validCeros(block.hash)) {
 			block.nonce++;
 			toHash = block.blockToHash() + block.nonce.toString();
-			block.hash = SHA256.hash(toHash);
+			block.hash = HashUtilities.hash(toHash);
 		}
 	}
 	
@@ -104,7 +131,7 @@ public class Blockchain {
 		Block current = last;
 		while(current!=null) {
 			if(current.previousBlock!=null)
-				if(!SHA256.compareHashes(current.previousHash, current.previousBlock.hash))
+				if(!HashUtilities.compareHashes(current.previousHash, current.previousBlock.hash))
 					return false;
 			
 			current = current.previousBlock;
@@ -127,6 +154,7 @@ public class Blockchain {
 	}
 	
 	//Devuelve falso si no existe el bloque con el indice indicado, verdadero en caso contrario
+	//Esta funcion se puede hacer mas sencilla recorriendo por el blockArray
 	public boolean modify(int index, int nonce, String operation, AVLTree tree, String prevHash) {
 		
 		Block current = last;
@@ -135,8 +163,8 @@ public class Blockchain {
 				current.nonce = nonce;
 				current.data.operation = operation;
 				current.data.currentState = tree;
-				current.previousHash = SHA256.hexToByte(prevHash);
-				current.hash = SHA256.hash(current.blockToHash());	//Actualizo el hash del bloque luego de modificarlo
+				current.previousHash = HashUtilities.hexToByte(prevHash);
+				current.hash = HashUtilities.hash(current.blockToHash());	//Actualizo el hash del bloque luego de modificarlo
 				return true;
 			}
 			
