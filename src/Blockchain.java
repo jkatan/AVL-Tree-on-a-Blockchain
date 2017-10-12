@@ -36,14 +36,14 @@ public class Blockchain {
 				previousHash = previousBlock.hash;
 		}
 		
-		//Representacion en String del bloque para ser hasheado por SHA256
+		//Representacion en String del bloque para ser hasheado por HashUtilities
 		public String blockToHash() {
 			StringBuilder block = new StringBuilder();
 			block.append(index);
 			block.append(data.operation);
 			block.append(data.currentState.toString());
 			if(previousBlock!=null)
-				block.append(SHA256.bytesToHex(previousHash));	
+				block.append(HashUtilities.bytesToHex(previousHash));	
 			
 			return block.toString();
 		}
@@ -51,9 +51,9 @@ public class Blockchain {
 		private void print() {
 			System.out.println("Index: " + index);
 			System.out.println("Nonce: " + nonce);
-			System.out.println("Hash: " + SHA256.bytesToHex(hash));
+			System.out.println("Hash: " + HashUtilities.bytesToHex(hash));
 			if(previousHash!=null)
-				System.out.println("Previous hash: " + SHA256.bytesToHex(previousHash));
+				System.out.println("Previous hash: " + HashUtilities.bytesToHex(previousHash));
 			data.print();
 		}
 	}
@@ -75,12 +75,12 @@ public class Blockchain {
 	private void mine(Block block) {
 		block.nonce = 1;
 		String toHash = block.blockToHash() + block.nonce.toString();
-		block.hash = SHA256.hash(toHash);
+		block.hash = HashUtilities.hash(toHash);
 		
 		while(!validCeros(block.hash)) {
 			block.nonce++;
 			toHash = block.blockToHash() + block.nonce.toString();
-			block.hash = SHA256.hash(toHash);
+			block.hash = HashUtilities.hash(toHash);
 		}
 	}
 	
@@ -104,7 +104,7 @@ public class Blockchain {
 		Block current = last;
 		while(current!=null) {
 			if(current.previousBlock!=null)
-				if(!SHA256.compareHashes(current.previousHash, current.previousBlock.hash))
+				if(!HashUtilities.compareHashes(current.previousHash, current.previousBlock.hash))
 					return false;
 			
 			current = current.previousBlock;
@@ -135,8 +135,8 @@ public class Blockchain {
 				current.nonce = nonce;
 				current.data.operation = operation;
 				current.data.currentState = tree;
-				current.previousHash = SHA256.hexToByte(prevHash);
-				current.hash = SHA256.hash(current.blockToHash());	//Actualizo el hash del bloque luego de modificarlo
+				current.previousHash = HashUtilities.hexToByte(prevHash);
+				current.hash = HashUtilities.hash(current.blockToHash());	//Actualizo el hash del bloque luego de modificarlo
 				return true;
 			}
 			

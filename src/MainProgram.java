@@ -216,7 +216,7 @@ public class MainProgram {
 		if(prevHashArr.length != 2 || !prevHashArr[0].equals("prevHash"))
 			throw new InvalidFileFormatException("formato del prevHash no compatible");
 		
-		if(!SHA256.isHex(prevHashArr[1]))
+		if(!HashUtilities.isHex(prevHashArr[1]))
 			throw new InvalidFileFormatException("prevHash escrito no es hexadecimal");
 		String prevHash = prevHashArr[1];
 

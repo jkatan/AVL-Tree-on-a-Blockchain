@@ -4,7 +4,7 @@ import java.security.NoSuchAlgorithmException;
 
 import javax.xml.bind.DatatypeConverter;
 
-public abstract class SHA256 {
+public abstract class HashUtilities {
 
 	public static byte[] hash(String str) {
 		MessageDigest digest;
