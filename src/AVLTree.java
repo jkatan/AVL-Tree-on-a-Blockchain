@@ -145,6 +145,10 @@ public class AVLTree {
 
 		return node;
 	}
+
+	public boolean contains(Integer num){//Desarrollar busqueda en arbol binario.
+		return true;
+	}
 	
 	private static int height(AVLNode node) {
 		  return node == null ? -1 : node.height;

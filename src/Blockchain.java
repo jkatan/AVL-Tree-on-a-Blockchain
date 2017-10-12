@@ -1,3 +1,4 @@
+import java.util.Set;
 
 public class Blockchain {
 	private Block last;			//Ultimo bloque en la blockchain
@@ -17,12 +18,12 @@ public class Blockchain {
 		private static class BlockData {
 			String operation;		//Operacion realizada sobre el arbol AVL.
 			AVLTree currentState;	//El arbol AVL al momento de haber realizado la operacion.
-			ArrayList<Integer> modifiedValues; //Los bloques que fueron modificados en la ultima operacion.
+			Set<Integer> modifiedValues; //Los bloques que fueron modificados en la ultima operacion.
 			
-			BlockData(String operation, AVLTree currentState, ArrayList<Integer> modValues) {
+			BlockData(String operation, AVLTree currentState, Set<Integer> modValues) {
 				this.operation = operation;
 				this.currentState = currentState;
-				this.modifiedBlocks = modBlocks;
+				this.modifiedValues = modValues;
 			}
 			
 			private void print() {
@@ -32,7 +33,7 @@ public class Blockchain {
 			}
 		}
 		
-		Block(Integer index, String operation, AVLTree currentState, ArrayList<Integer> modValues, Block previousBlock) {
+		Block(Integer index, String operation, AVLTree currentState, Set<Integer> modValues, Block previousBlock) {
 			this.index = index;
 			this.previousBlock = previousBlock;
 			this.data = new BlockData(operation, currentState, modValues);
@@ -68,7 +69,7 @@ public class Blockchain {
 		this.initialCeros = initialCeros;
 	}
 	
-	public boolean addBlock(String operation, AVLTree currentTree, ArrayList<Integer> modValues) {
+	public boolean addBlock(String operation, AVLTree currentTree, Set<Integer> modValues) {
 		 
 		if(validate()) {
 			currentIndex++;
@@ -81,17 +82,27 @@ public class Blockchain {
 		return false;
 	}
 
-	public ArrayList<Integer> lookup(Integer num){
-		ArrayList<Integer> blockIndexes = new ArrayList<Integer>();
-		lookupRec(blockindexes, this.last, num);
-		if(blockIndexes.isEmpty())
+	public Set<Integer> lookup(Integer num){
+		currentIndex++;
+
+		if(!last.data.currentState.contains(num)){ //Hay que generar esta funcion que retorne true/false.
+			Block block = new Block(currentIndex, "lookup " + num + " - false", last.data.currentState, null, last);
+			mine(block);
+			last = block;
 			return null;
-		return blockIndexes;
+		} else {
+			Set<Integer> blockIndexes = null;
+			lookupRec(blockIndexes, this.last, num);
+			Block block = new Block(currentIndex, "lookup " + num + " - true", last.data.currentState, null, last);
+			mine(block);
+			last = block;
+			return blockIndexes;
+		}
 	}
 
-	private void lookupRec(ArrayList<Integer> indexRet, Block current, Integer num) {
+	private void lookupRec(Set<Integer> indexRet, Block current, Integer num) {
 		if(current.data.modifiedValues.contains(num)){
-			indexRet.insert(num);
+			indexRet.add(num);
 		}else if (current.previousBlock == null) {
 			return;
 		}else {

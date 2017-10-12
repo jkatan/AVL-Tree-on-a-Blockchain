@@ -1,6 +1,7 @@
 import java.util.InputMismatchException;
 import java.util.Scanner;
 import java.io.*;
+import java.util.Set;
 
 public class MainProgram {
 	public static void main(String[] args) {
@@ -40,7 +41,7 @@ public class MainProgram {
 				
 				boolean valid = true;
 				if(numToRead!=null) {
-					ArrayList<Integer> modedValues = tree.insert(numToRead);
+					Set<Integer> modedValues = tree.insert(numToRead);
 					if(!blockchain.addBlock("add " + numToRead, new AVLTree(tree), modedValues)) {
 						System.out.println("Invalid Blockchain, cant make operations on an invalid Blockchain");
 						valid = false;
@@ -59,7 +60,7 @@ public class MainProgram {
 					numToRead = null;
 				}
 				if(numToRead!=null) {
-					ArrayList<Integer> modedValues = tree.remove(numToRead);
+					Set<Integer> modedValues = tree.remove(numToRead);
 					blockchain.addBlock("remove " + numToRead, new AVLTree(tree), modedValues);
 					blockchain.print();
 				}
@@ -74,7 +75,7 @@ public class MainProgram {
 					numToRead = null;
 				}
 				if(numToRead!=null) {
-					ArrayList<Integer> output;
+					Set<Integer> output;
 					output = blockchain.lookup(numToRead);
 					if (output != null) {
 						System.out.println(output); //Hay que checkear el formato en el que queremos que aparezca a la
