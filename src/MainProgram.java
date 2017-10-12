@@ -40,8 +40,8 @@ public class MainProgram {
 				
 				boolean valid = true;
 				if(numToRead!=null) {
-					tree.insert(numToRead);
-					if(!blockchain.addBlock("add " + numToRead, new AVLTree(tree))) {
+					ArrayList<Integer> modedValues = tree.insert(numToRead);
+					if(!blockchain.addBlock("add " + numToRead, new AVLTree(tree), modedValues)) {
 						System.out.println("Invalid Blockchain, cant make operations on an invalid Blockchain");
 						valid = false;
 					}
@@ -59,8 +59,8 @@ public class MainProgram {
 					numToRead = null;
 				}
 				if(numToRead!=null) {
-					tree.remove(numToRead);
-					blockchain.addBlock("remove " + numToRead, new AVLTree(tree));
+					ArrayList<Integer> modedValues = tree.remove(numToRead);
+					blockchain.addBlock("remove " + numToRead, new AVLTree(tree), modedValues);
 					blockchain.print();
 				}
 			}

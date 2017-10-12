@@ -20,11 +20,12 @@ public class Blockchain {
 		private static class BlockData {
 			String operation;		//Operacion realizada sobre el arbol AVL.
 			AVLTree currentState;	//El arbol AVL al momento de haber realizado la operacion.
-			ArrayList<Block> modifiedBlocks; //Los bloques que fueron modificados en la ultima operacion.
+			ArrayList<Integer> modifiedValues; //Los bloques que fueron modificados en la ultima operacion.
 			
-			BlockData(String operation, AVLTree currentState) {
+			BlockData(String operation, AVLTree currentState, ArrayList<Integer> modValues) {
 				this.operation = operation;
 				this.currentState = currentState;
+				this.modifiedBlocks = modBlocks;
 			}
 			
 			private void print() {
@@ -34,10 +35,10 @@ public class Blockchain {
 			}
 		}
 		
-		Block(Integer index, String operation, AVLTree currentState, Block previousBlock) {
+		Block(Integer index, String operation, AVLTree currentState, ArrayList<Integer> modValues, Block previousBlock) {
 			this.index = index;
 			this.previousBlock = previousBlock;
-			this.data = new BlockData(operation, currentState);		
+			this.data = new BlockData(operation, currentState, modValues);
 			if(previousBlock!=null)
 				previousHash = previousBlock.hash;
 		}
@@ -71,13 +72,14 @@ public class Blockchain {
 		this.initialCeros = initialCeros;
 	}
 	
-	public boolean addBlock(String operation, AVLTree currentTree) {
+	public boolean addBlock(String operation, AVLTree currentTree, ArrayList<Integer> modValues) {
 		 
 		if(validate()) {
 			currentIndex++;
-			Block block = new Block(currentIndex, operation, currentTree, last);
+			Block block = new Block(currentIndex, operation, currentTree, modValues, last);
 			mine(block);
 			last = block;
+			blockArray.insert(block);
 			return true;
 		}
 		
