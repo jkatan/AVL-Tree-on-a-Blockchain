@@ -38,10 +38,15 @@ public class MainProgram {
 					numToRead = null;
 				}
 				
+				boolean valid = true;
 				if(numToRead!=null) {
 					tree.insert(numToRead);
-					blockchain.addBlock("add " + numToRead, new AVLTree(tree));
-					blockchain.printCurrentBlock();
+					if(!blockchain.addBlock("add " + numToRead, new AVLTree(tree))) {
+						System.out.println("Invalid Blockchain, cant make operations on an invalid Blockchain");
+						valid = false;
+					}
+					if(valid)
+						blockchain.printCurrentBlock();
 				}
 			}
 			else if (cmd.startsWith("remove ")) {

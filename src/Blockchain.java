@@ -64,12 +64,17 @@ public class Blockchain {
 		this.initialCeros = initialCeros;
 	}
 	
-	public void addBlock(String operation, AVLTree currentTree) {
+	public boolean addBlock(String operation, AVLTree currentTree) {
 		 
-		currentIndex++;
-		Block block = new Block(currentIndex, operation, currentTree, last);
-		mine(block);
-		last = block;
+		if(validate()) {
+			currentIndex++;
+			Block block = new Block(currentIndex, operation, currentTree, last);
+			mine(block);
+			last = block;
+			return true;
+		}
+		
+		return false;
 	}
 	
 	private void mine(Block block) {
