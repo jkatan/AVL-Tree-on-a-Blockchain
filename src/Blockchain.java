@@ -3,9 +3,6 @@ public class Blockchain {
 	private Block last;			//Ultimo bloque en la blockchain
 	private int currentIndex;	//Indice del ultimo bloque agregado en la blockchain
 	private int initialCeros;	//Cantidad de ceros iniciales para validar el hash
-	private ArrayList<Block> blockArray; //Este array hace que la blockchain sea mas sencilla de recorrer, facilitando
-	//los algoritmos de modify, validate y lookup. No pierde seguridad ya que la blockchain en si no es segura al tener
-	//un arbol por bloque, ni teniendo un arbol auxiliar.
 	//Comentario extra: si no pidiera retornar nodos modificados, la blockchain podria hacerse mucho mas segura armando
 	//el arbol unicamente cuando se lo pide, es decir guardando instrucciones (partes) del mismo en cada bloque.
 
@@ -68,7 +65,6 @@ public class Blockchain {
 	public Blockchain(int initialCeros) {
 		currentIndex = 0;
 		last = null;
-		blockArray = new ArrayList<Block>();
 		this.initialCeros = initialCeros;
 	}
 	
@@ -79,7 +75,6 @@ public class Blockchain {
 			Block block = new Block(currentIndex, operation, currentTree, modValues, last);
 			mine(block);
 			last = block;
-			blockArray.insert(block);
 			return true;
 		}
 		
@@ -88,13 +83,20 @@ public class Blockchain {
 
 	public ArrayList<Integer> lookup(Integer num){
 		ArrayList<Integer> blockIndexes = new ArrayList<Integer>();
-		for(Block b: blockArray){
-			if(b.blockData.modifiedBlocks.contains(num))
-				blockIndexes.insert(b.index);
-		}
+		lookupRec(blockindexes, this.last, num);
 		if(blockIndexes.isEmpty())
 			return null;
 		return blockIndexes;
+	}
+
+	private void lookupRec(ArrayList<Integer> indexRet, Block current, Integer num) {
+		if(current.data.modifiedValues.contains(num)){
+			indexRet.insert(num);
+		}else if (current.previousBlock == null) {
+			return;
+		}else {
+			lookupRec(indexRet, current.previousBlock, num);
+		}
 	}
 	
 	private void mine(Block block) {

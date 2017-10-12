@@ -80,7 +80,7 @@ public class MainProgram {
 						System.out.println(output); //Hay que checkear el formato en el que queremos que aparezca a la
 						//no se de que forma imprime println a un array.
 					} else {
-						System.out.println(numToRead + "did not belong to this AVL tree");
+						System.out.println(numToRead + " did not belong to this AVL tree");
 					}
 				}
 			}
