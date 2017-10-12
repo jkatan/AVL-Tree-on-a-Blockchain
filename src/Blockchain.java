@@ -3,7 +3,12 @@ public class Blockchain {
 	private Block last;			//Ultimo bloque en la blockchain
 	private int currentIndex;	//Indice del ultimo bloque agregado en la blockchain
 	private int initialCeros;	//Cantidad de ceros iniciales para validar el hash
-	
+	private ArrayList<Block> blockArray; //Este array hace que la blockchain sea mas sencilla de recorrer, facilitando
+	//los algoritmos de modify, validate y lookup. No pierde seguridad ya que la blockchain en si no es segura al tener
+	//un arbol por bloque, ni teniendo un arbol auxiliar.
+	//Comentario extra: si no pidiera retornar nodos modificados, la blockchain podria hacerse mucho mas segura armando
+	//el arbol unicamente cuando se lo pide, es decir guardando instrucciones (partes) del mismo en cada bloque.
+
 	private static class Block {
 		Integer index;
 		Integer nonce;
@@ -15,6 +20,7 @@ public class Blockchain {
 		private static class BlockData {
 			String operation;		//Operacion realizada sobre el arbol AVL.
 			AVLTree currentState;	//El arbol AVL al momento de haber realizado la operacion.
+			ArrayList<Block> modifiedBlocks; //Los bloques que fueron modificados en la ultima operacion.
 			
 			BlockData(String operation, AVLTree currentState) {
 				this.operation = operation;
@@ -61,6 +67,7 @@ public class Blockchain {
 	public Blockchain(int initialCeros) {
 		currentIndex = 0;
 		last = null;
+		blockArray = new ArrayList<Block>();
 		this.initialCeros = initialCeros;
 	}
 	
@@ -75,6 +82,17 @@ public class Blockchain {
 		}
 		
 		return false;
+	}
+
+	public ArrayList<Integer> lookup(Integer num){
+		ArrayList<Integer> blockIndexes = new ArrayList<Integer>();
+		for(Block b: blockArray){
+			if(b.blockData.modifiedBlocks.contains(num))
+				blockIndexes.insert(b.index);
+		}
+		if(blockIndexes.isEmpty())
+			return null;
+		return blockIndexes;
 	}
 	
 	private void mine(Block block) {
@@ -132,6 +150,7 @@ public class Blockchain {
 	}
 	
 	//Devuelve falso si no existe el bloque con el indice indicado, verdadero en caso contrario
+	//Esta funcion se puede hacer mas sencilla recorriendo por el blockArray
 	public boolean modify(int index, int nonce, String operation, AVLTree tree, String prevHash) {
 		
 		Block current = last;

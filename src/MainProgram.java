@@ -65,7 +65,24 @@ public class MainProgram {
 				}
 			}
 			else if (cmd.startsWith("lookup ")) {
-				
+				String num = cmd.substring(7);
+				try {
+					numToRead = Integer.parseInt(num);
+				}
+				catch (NumberFormatException e) {
+					System.out.println("Invalid Command");
+					numToRead = null;
+				}
+				if(numToRead!=null) {
+					ArrayList<Integer> output;
+					output = blockchain.lookup(numToRead);
+					if (output != null) {
+						System.out.println(output); //Hay que checkear el formato en el que queremos que aparezca a la
+						//no se de que forma imprime println a un array.
+					} else {
+						System.out.println(numToRead + "did not belong to this AVL tree");
+					}
+				}
 			}
 			else if (cmd.equals("validate")) {
 				if(blockchain.validate())
