@@ -1,3 +1,7 @@
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -295,4 +299,41 @@ public class AVLTree {
 		
 		return tree.toString();
 	}
+	
+	public static void generateDot(String path, AVLTree tree) throws IOException {
+		
+        File graphic = new File(path);
+        BufferedWriter bw = null;
+        
+        if(graphic.exists()) {
+            System.out.println("El archivo ya existe");
+        } else {
+        	bw = new BufferedWriter(new FileWriter(graphic));
+            AVLDot(tree.root, graphic, bw);
+        }
+        
+        if(bw != null)
+        	bw.close();
+	}
+	
+	private static void AVLDot(AVLNode tree, File stream, BufferedWriter bw) throws IOException {
+	    bw.write("graph AVL {\n");
+	    bw.write("node [fontname=\"Arial\"];\n");
+
+	    AVLDotAux(tree, stream , bw);
+
+	    bw.write("}");
+	}
+	
+	private static void AVLDotAux(AVLNode node, File stream, BufferedWriter bw) throws IOException {
+	    if (node.left != null) {
+	    	bw.write(node.num + " -- " + node.left.num + "\n");
+	        AVLDotAux(node.left, stream, bw);
+	    }
+	    if (node.right != null) {
+	        bw.write(node.num + " -- " + node.right.num + "\n");
+	        AVLDotAux(node.right, stream, bw);
+	    }
+	}
+
 }

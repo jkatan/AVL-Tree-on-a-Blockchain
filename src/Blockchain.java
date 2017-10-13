@@ -30,6 +30,8 @@ public class Blockchain {
 				System.out.println("Tree: ");
 				if(modifiedValues!=null)
 					System.out.println("Modified nodes: " + modifiedValues);
+				else
+					System.out.println("No modified nodes");
 				currentState.print();
 			}
 		}
@@ -100,12 +102,11 @@ public class Blockchain {
 
 	private void lookupRec(Set<Integer> indexRet, Block current, Integer num) {
 		if(current.data.modifiedValues!=null && current.data.modifiedValues.contains(num)){
-			indexRet.add(num);
-		}else if (current.previousBlock == null) {
+			indexRet.add(current.index);
+		}else if (current.previousBlock == null) 
 			return;
-		}else {
-			lookupRec(indexRet, current.previousBlock, num);
-		}
+			
+		lookupRec(indexRet, current.previousBlock, num);
 	}
 	
 	private void mine(Block block) {
