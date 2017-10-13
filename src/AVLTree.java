@@ -129,6 +129,7 @@ public class AVLTree {
 					aux = aux.left;
 				}
 				
+				set.add(node.num);
 				node.num = aux.num;
 				node.right = remove(aux.num, node.right, set);
 			}
@@ -138,6 +139,7 @@ public class AVLTree {
 					aux = aux.right;
 				}
 				
+				set.add(node.num);
 				node.num = aux.num;
 				node.left = remove(aux.num, node.left, set);
 			}
