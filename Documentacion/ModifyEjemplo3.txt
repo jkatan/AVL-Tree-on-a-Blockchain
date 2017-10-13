@@ -1,0 +1,5 @@
+nonce: 112146
+operation: lookup 5 - true
+tree: 4, 3
+modified:
+prevHash: 00002a1ede68d187ce1d7ac3dd9b4d6b91f2afc7767cca40886757f791a77be4
