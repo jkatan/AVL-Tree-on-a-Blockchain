@@ -27,11 +27,11 @@ public class Blockchain {
 			
 			private void print() {
 				System.out.println("Operation: " + operation);
-				System.out.println("Tree: ");
 				if(modifiedValues!=null)
 					System.out.println("Modified nodes: " + modifiedValues);
 				else
 					System.out.println("No modified nodes");
+				System.out.println("Tree: ");
 				currentState.print();
 			}
 		}
@@ -181,7 +181,10 @@ public class Blockchain {
 				current.nonce = nonce;
 				current.data.operation = operation;
 				current.data.currentState = tree;
-				current.previousHash = HashUtilities.hexToByte(prevHash);
+				if(prevHash == null)
+					current.previousHash = null;
+				else
+					current.previousHash = HashUtilities.hexToByte(prevHash);
 				return true;
 			}
 			
