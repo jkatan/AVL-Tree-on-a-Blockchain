@@ -103,7 +103,9 @@ public class Blockchain {
 	private void lookupRec(Set<Integer> indexRet, Block current, Integer num) {
 		if(current.data.modifiedValues!=null && current.data.modifiedValues.contains(num)){
 			indexRet.add(current.index);
-		}else if (current.previousBlock == null) 
+		}
+		
+		if (current.previousBlock == null) 
 			return;
 			
 		lookupRec(indexRet, current.previousBlock, num);
