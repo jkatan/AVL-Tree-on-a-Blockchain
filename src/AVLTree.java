@@ -147,6 +147,18 @@ public class AVLTree {
 	}
 
 	public boolean contains(Integer num){//Desarrollar busqueda en arbol binario.
+		return containsRec(num, root);
+	}
+
+	private boolean containsRec(Integer num, AVLNode current){
+		if (current == null){
+			return false; // The node was not found
+
+		} else if (num.compareTo(current.num) < 0){
+			return containsRec(num, current.left);
+		} else if (num.compareTo(current.num) > 0){
+			return containsRec(num, current.right);
+		}
 		return true;
 	}
 	
