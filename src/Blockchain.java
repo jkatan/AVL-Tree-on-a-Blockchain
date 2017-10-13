@@ -1,10 +1,10 @@
+import java.util.HashSet;
+import java.util.Set;
 
 public class Blockchain {
 	private Block last;			//Ultimo bloque en la blockchain
 	private int currentIndex;	//Indice del ultimo bloque agregado en la blockchain
 	private int initialCeros;	//Cantidad de ceros iniciales para validar el hash
-	//Comentario extra: si no pidiera retornar nodos modificados, la blockchain podria hacerse mucho mas segura armando
-	//el arbol unicamente cuando se lo pide, es decir guardando instrucciones (partes) del mismo en cada bloque.
 
 	private static class Block {
 		Integer index;
@@ -17,22 +17,24 @@ public class Blockchain {
 		private static class BlockData {
 			String operation;		//Operacion realizada sobre el arbol AVL.
 			AVLTree currentState;	//El arbol AVL al momento de haber realizado la operacion.
-			ArrayList<Integer> modifiedValues; //Los bloques que fueron modificados en la ultima operacion.
+			Set<Integer> modifiedValues; //Los bloques que fueron modificados en la ultima operacion.
 			
-			BlockData(String operation, AVLTree currentState, ArrayList<Integer> modValues) {
+			BlockData(String operation, AVLTree currentState, Set<Integer> modValues) {
 				this.operation = operation;
 				this.currentState = currentState;
-				this.modifiedBlocks = modBlocks;
+				this.modifiedValues = modValues;
 			}
 			
 			private void print() {
 				System.out.println("Operation: " + operation);
 				System.out.println("Tree: ");
+				if(modifiedValues!=null)
+					System.out.println("Modified nodes: " + modifiedValues);
 				currentState.print();
 			}
 		}
 		
-		Block(Integer index, String operation, AVLTree currentState, ArrayList<Integer> modValues, Block previousBlock) {
+		Block(Integer index, String operation, AVLTree currentState, Set<Integer> modValues, Block previousBlock) {
 			this.index = index;
 			this.previousBlock = previousBlock;
 			this.data = new BlockData(operation, currentState, modValues);
@@ -46,6 +48,8 @@ public class Blockchain {
 			block.append(index);
 			block.append(data.operation);
 			block.append(data.currentState.toString());
+			if(data.modifiedValues!=null)
+				block.append(data.modifiedValues.toString());
 			if(previousBlock!=null)
 				block.append(HashUtilities.bytesToHex(previousHash));	
 			
@@ -68,7 +72,7 @@ public class Blockchain {
 		this.initialCeros = initialCeros;
 	}
 	
-	public boolean addBlock(String operation, AVLTree currentTree, ArrayList<Integer> modValues) {
+	public boolean addBlock(String operation, AVLTree currentTree, Set<Integer> modValues) {
 		 
 		if(validate()) {
 			currentIndex++;
@@ -81,17 +85,22 @@ public class Blockchain {
 		return false;
 	}
 
-	public ArrayList<Integer> lookup(Integer num){
-		ArrayList<Integer> blockIndexes = new ArrayList<Integer>();
-		lookupRec(blockindexes, this.last, num);
-		if(blockIndexes.isEmpty())
+	public Set<Integer> lookup(Integer num){
+
+		if(!last.data.currentState.contains(num)){ 
+			addBlock("lookup " + num + " - false", last.data.currentState, null);
 			return null;
-		return blockIndexes;
+		} else {
+			Set<Integer> blockIndexes = new HashSet<>();
+			addBlock("lookup " + num + " - true", last.data.currentState, null);
+			lookupRec(blockIndexes, this.last, num);
+			return blockIndexes;
+		}
 	}
 
-	private void lookupRec(ArrayList<Integer> indexRet, Block current, Integer num) {
-		if(current.data.modifiedValues.contains(num)){
-			indexRet.insert(num);
+	private void lookupRec(Set<Integer> indexRet, Block current, Integer num) {
+		if(current.data.modifiedValues!=null && current.data.modifiedValues.contains(num)){
+			indexRet.add(num);
 		}else if (current.previousBlock == null) {
 			return;
 		}else {

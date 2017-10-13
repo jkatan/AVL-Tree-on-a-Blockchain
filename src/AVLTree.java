@@ -62,7 +62,12 @@ public class AVLTree {
 			set.add(node.num);
 		}
 		else if (num < node.num) {
+			AVLNode aux = node.left;
 			node.left = insert(num, node.left, set);
+			
+			if (node.left != aux)
+				set.add(node.num);
+			
 			if (balanceFactor(node) == 2) {
 				if (num < node.left.num)
 					node = rightRotation(node, set);
@@ -71,7 +76,12 @@ public class AVLTree {
 			}
 		}
 		else if (num > node.num) {
+			AVLNode aux = node.right;
 			node.right = insert(num, node.right, set);
+			
+			if (node.right != aux)
+				set.add(node.num);
+			
 			if (balanceFactor(node) == -2) {
 				if (num > node.right.num)
 					node = leftRotation(node, set);
@@ -95,10 +105,18 @@ public class AVLTree {
 			return node;
 		
 		if (num < node.num) {
+			AVLNode aux = node.left;
 			node.left = remove(num, node.left, set);
+			
+			if (node.left != aux)
+				set.add(node.num);
 		}
 		else if (num > node.num) {
+			AVLNode aux = node.right;
 			node.right = remove(num, node.right, set);
+			
+			if (node.right != aux)
+				set.add(node.num);
 		}
 		else if (num == node.num) {
 			if (node.right != null) {
@@ -145,6 +163,22 @@ public class AVLTree {
 
 		return node;
 	}
+
+	public boolean contains(Integer num){//Desarrollar busqueda en arbol binario.
+		return containsRec(num, root);
+	}
+
+	private boolean containsRec(Integer num, AVLNode current){
+		if (current == null){
+			return false; // The node was not found
+
+		} else if (num.compareTo(current.num) < 0){
+			return containsRec(num, current.left);
+		} else if (num.compareTo(current.num) > 0){
+			return containsRec(num, current.right);
+		}
+		return true;
+	}
 	
 	private static int height(AVLNode node) {
 		  return node == null ? -1 : node.height;
@@ -162,6 +196,8 @@ public class AVLTree {
         set.add(node.num);
         if (node.left != null)
         	set.add(node.left.num);
+        if (aux.left != null)
+        	set.add(aux.left.num);
         node.height = Math.max(height(node.left), height(node.right)) + 1;
         aux.height = Math.max(height(aux.left), node.height) + 1;
         return aux;
@@ -175,6 +211,8 @@ public class AVLTree {
         set.add(node.num);
         if (node.right != null)
         	set.add(node.right.num);
+        if (aux.right != null)
+        	set.add(aux.right.num);
         node.height = Math.max(height(node.left), height(node.right)) + 1;
         aux.height = Math.max(height(aux.right), node.height) + 1;
         return aux;
