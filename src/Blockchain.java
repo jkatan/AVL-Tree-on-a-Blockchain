@@ -57,6 +57,10 @@ public class Blockchain {
 			
 			return block.toString();
 		}
+
+		public String blockTrueHash(){
+			return this.blockToHash() + Integer.toString(this.nonce);
+		}
 		
 		private void print() {
 			System.out.println("Index: " + index);
@@ -142,10 +146,12 @@ public class Blockchain {
 		
 		Block current = last;
 		while(current!=null) {
-			if(current.previousBlock!=null)
-				if(!HashUtilities.compareHashes(current.previousHash, current.previousBlock.hash))
+			if (current.previousBlock != null) {
+				if (!HashUtilities.compareHashes(current.previousHash, HashUtilities.hash(current.previousBlock.blockTrueHash()))){
 					return false;
-			
+				}
+			}
+
 			current = current.previousBlock;
 		}
 		
@@ -176,7 +182,6 @@ public class Blockchain {
 				current.data.operation = operation;
 				current.data.currentState = tree;
 				current.previousHash = HashUtilities.hexToByte(prevHash);
-				current.hash = HashUtilities.hash(current.blockToHash());	//Actualizo el hash del bloque luego de modificarlo
 				return true;
 			}
 			
