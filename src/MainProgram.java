@@ -5,12 +5,12 @@ import java.util.Set;
 
 public class MainProgram {
 	public static void main(String[] args) {
-		
+		String[] a = {"zeros 3"};
 		boolean exit = false;
 		int zeros = 0;
 
 		try {
-			zeros = readArgs(args);
+			zeros = readArgs(a);
 		}
 		catch (IllegalArgumentException e) {
 			System.out.println("Invalid Argument");

@@ -1,11 +1,10 @@
+import java.util.HashSet;
 import java.util.Set;
 
 public class Blockchain {
 	private Block last;			//Ultimo bloque en la blockchain
 	private int currentIndex;	//Indice del ultimo bloque agregado en la blockchain
 	private int initialCeros;	//Cantidad de ceros iniciales para validar el hash
-	//Comentario extra: si no pidiera retornar nodos modificados, la blockchain podria hacerse mucho mas segura armando
-	//el arbol unicamente cuando se lo pide, es decir guardando instrucciones (partes) del mismo en cada bloque.
 
 	private static class Block {
 		Integer index;
@@ -29,6 +28,8 @@ public class Blockchain {
 			private void print() {
 				System.out.println("Operation: " + operation);
 				System.out.println("Tree: ");
+				if(modifiedValues!=null)
+					System.out.println("Modified nodes: " + modifiedValues);
 				currentState.print();
 			}
 		}
@@ -47,6 +48,8 @@ public class Blockchain {
 			block.append(index);
 			block.append(data.operation);
 			block.append(data.currentState.toString());
+			if(data.modifiedValues!=null)
+				block.append(data.modifiedValues.toString());
 			if(previousBlock!=null)
 				block.append(HashUtilities.bytesToHex(previousHash));	
 			
@@ -83,25 +86,20 @@ public class Blockchain {
 	}
 
 	public Set<Integer> lookup(Integer num){
-		currentIndex++;
 
-		if(!last.data.currentState.contains(num)){ //Hay que generar esta funcion que retorne true/false.
-			Block block = new Block(currentIndex, "lookup " + num + " - false", last.data.currentState, null, last);
-			mine(block);
-			last = block;
+		if(!last.data.currentState.contains(num)){ 
+			addBlock("lookup " + num + " - false", last.data.currentState, null);
 			return null;
 		} else {
-			Set<Integer> blockIndexes = null;
+			Set<Integer> blockIndexes = new HashSet<>();
+			addBlock("lookup " + num + " - true", last.data.currentState, null);
 			lookupRec(blockIndexes, this.last, num);
-			Block block = new Block(currentIndex, "lookup " + num + " - true", last.data.currentState, null, last);
-			mine(block);
-			last = block;
 			return blockIndexes;
 		}
 	}
 
 	private void lookupRec(Set<Integer> indexRet, Block current, Integer num) {
-		if(current.data.modifiedValues.contains(num)){
+		if(current.data.modifiedValues!=null && current.data.modifiedValues.contains(num)){
 			indexRet.add(num);
 		}else if (current.previousBlock == null) {
 			return;
