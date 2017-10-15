@@ -1,0 +1,5 @@
+nonce: 10761
+operation: add 60
+tree: 60
+modified: 60
+prevHash: 0000114c66862044fcbe8b6c1c4a4878507971650c7beaea3d179515f394baf4

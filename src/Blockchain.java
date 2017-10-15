@@ -27,9 +27,11 @@ public class Blockchain {
 			
 			private void print() {
 				System.out.println("Operation: " + operation);
-				System.out.println("Tree: ");
 				if(modifiedValues!=null)
 					System.out.println("Modified nodes: " + modifiedValues);
+				else
+					System.out.println("No modified nodes");
+				System.out.println("Tree: ");
 				currentState.print();
 			}
 		}
@@ -54,6 +56,10 @@ public class Blockchain {
 				block.append(HashUtilities.bytesToHex(previousHash));	
 			
 			return block.toString();
+		}
+
+		public String blockTrueHash(){
+			return this.blockToHash() + Integer.toString(this.nonce);
 		}
 		
 		private void print() {
@@ -100,12 +106,13 @@ public class Blockchain {
 
 	private void lookupRec(Set<Integer> indexRet, Block current, Integer num) {
 		if(current.data.modifiedValues!=null && current.data.modifiedValues.contains(num)){
-			indexRet.add(num);
-		}else if (current.previousBlock == null) {
-			return;
-		}else {
-			lookupRec(indexRet, current.previousBlock, num);
+			indexRet.add(current.index);
 		}
+		
+		if (current.previousBlock == null) 
+			return;
+			
+		lookupRec(indexRet, current.previousBlock, num);
 	}
 	
 	private void mine(Block block) {
@@ -139,10 +146,12 @@ public class Blockchain {
 		
 		Block current = last;
 		while(current!=null) {
-			if(current.previousBlock!=null)
-				if(!HashUtilities.compareHashes(current.previousHash, current.previousBlock.hash))
+			if (current.previousBlock != null) {
+				if (!HashUtilities.compareHashes(current.previousHash, HashUtilities.hash(current.previousBlock.blockTrueHash()))){
 					return false;
-			
+				}
+			}
+
 			current = current.previousBlock;
 		}
 		
@@ -172,8 +181,10 @@ public class Blockchain {
 				current.nonce = nonce;
 				current.data.operation = operation;
 				current.data.currentState = tree;
-				current.previousHash = HashUtilities.hexToByte(prevHash);
-				current.hash = HashUtilities.hash(current.blockToHash());	//Actualizo el hash del bloque luego de modificarlo
+				if(prevHash == null)
+					current.previousHash = null;
+				else
+					current.previousHash = HashUtilities.hexToByte(prevHash);
 				return true;
 			}
 			

@@ -49,6 +49,14 @@ public class MainProgram {
 						blockchain.printCurrentBlock();
 				}
 			}
+			else if (cmd.startsWith("export ")) {
+				String path = cmd.substring(7);
+				try {
+					AVLTree.generateDot(path, tree);
+				} catch (IOException e) {
+					System.out.println("Error generating file");
+				}
+			}
 			else if (cmd.startsWith("remove ")) {
 				String num = cmd.substring(7);
 				try {
@@ -61,7 +69,7 @@ public class MainProgram {
 				if(numToRead!=null) {
 					Set<Integer> modedValues = tree.remove(numToRead);
 					blockchain.addBlock("remove " + numToRead, new AVLTree(tree), modedValues);
-					blockchain.print();
+					blockchain.printCurrentBlock();;
 				}
 			}
 			else if (cmd.startsWith("lookup ")) {
@@ -74,14 +82,15 @@ public class MainProgram {
 					numToRead = null;
 				}
 				if(numToRead!=null) {
-					Set<Integer> output;
-					output = blockchain.lookup(numToRead);
+					Set<Integer> output = blockchain.lookup(numToRead);
 					if (output != null) {
-						System.out.println(output); //Hay que checkear el formato en el que queremos que aparezca a la
-						//no se de que forma imprime println a un array.
+						System.out.println("Indexes of blocks that modified selected node: " + output); 
+						
 					} else {
-						System.out.println(numToRead + " did not belong to this AVL tree");
+						System.out.println(numToRead + " does not belong to this AVL tree");
 					}
+					
+					blockchain.printCurrentBlock();
 				}
 			}
 			else if (cmd.equals("validate")) {
@@ -195,10 +204,14 @@ public class MainProgram {
 		
 		// hay que estandarizar los nombres de las operaciones para el archivo
 		String [] operationArr =  operationStr.split(": ");
-		if(operationArr.length != 2 || !operationArr[0].equals("operation") || (!operationArr[1].startsWith("add") 
-				&& !operationArr[1].startsWith("remove")))
+		if(!(operationArr.length == 2 || operationArr.length == 4) || !operationArr[0].equals("operation") || (!operationArr[1].startsWith("add")
+				&& !operationArr[1].startsWith("remove") && !operationArr[1].startsWith("lookup")))
 			throw new InvalidFileFormatException("formato de los datos no compatible");
-		operation = operationArr[1];
+
+		if(operationArr.length == 2)
+			operation = operationArr[1];
+		else
+			operation = operationArr[1]+" "+operationArr[2]+" "+operationArr[3];
 
 		//el arbol debe estar como una list en formato BFS en el archivo
 		String[] treeData = treeBFS.split(": ");
@@ -235,12 +248,17 @@ public class MainProgram {
 		}
 
 		String [] prevHashArr =  prevHashStr.split(": ");
-		if(prevHashArr.length != 2 || !prevHashArr[0].equals("prevHash"))
+		if(!(prevHashArr.length == 1 || prevHashArr.length == 2) || !prevHashArr[0].equals("prevHash"))
 			throw new InvalidFileFormatException("formato del prevHash no compatible");
-		
-		if(!HashUtilities.isHex(prevHashArr[1]))
-			throw new InvalidFileFormatException("prevHash escrito no es hexadecimal");
-		String prevHash = prevHashArr[1];
+		String prevHash;
+		if(prevHashArr.length == 1){
+			prevHash = null;
+		}
+		else {
+			if (!HashUtilities.isHex(prevHashArr[1]) || prevHashArr[1].length() != 64)
+				throw new InvalidFileFormatException("prevHash escrito no es hexadecimal de 64 caracteres (como lo es SHA-256)");
+			prevHash = prevHashArr[1];
+		}
 
 		blockchain.modify(index, nonce, operation, tree, prevHash);
 	}
