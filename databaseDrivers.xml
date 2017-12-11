@@ -40,7 +40,7 @@
     <driver id="sybase.ase">
       <option name="auto-sync" value="true" />
     </driver>
-    <driver id="postgresql" name="u2017b-2">
+    <driver id="postgresql">
       <artifact name="PostgreSQL" use="true" version="42.1.1" />
       <option name="auto-sync" value="true" />
       <option name="auto-commit" value="true" />
